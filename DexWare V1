@@ -31,6 +31,15 @@ task.delay(3, function()
     debugLabel:Destroy()
 end)
 
+-- Hide/Show Keybind (RightShift)
+local guiVisible = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
+        guiVisible = not guiVisible
+        ScreenGui.Enabled = guiVisible
+    end
+end)
+
 -- Draggable Function
 local function makeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
