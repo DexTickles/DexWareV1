@@ -1,4 +1,4 @@
--- DexTickles Ultimate GUI v1.0
+-- DexTickles Ultimate GUI v1.1
 -- Stream-proof, modular, sleek dark-themed GUI with advanced tools
 
 -- Services
@@ -44,8 +44,8 @@ end
 
 -- Main Frame
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 550, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
+MainFrame.Size = UDim2.new(0, 550, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -275, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -53,7 +53,6 @@ MainFrame.Draggable = false
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.Parent = ScreenGui
 makeDraggable(MainFrame)
-
 local UICorner = Instance.new("UICorner", MainFrame)
 UICorner.CornerRadius = UDim.new(0, 12)
 
@@ -72,7 +71,6 @@ ContentFrame.Parent = MainFrame
 local Tabs = {}
 local CurrentTab = nil
 
--- Tab Button Function
 local function createTab(name)
     local button = Instance.new("TextButton")
     button.Text = name
@@ -101,6 +99,7 @@ end
 
 -- ESP Tab
 local ESPTab = createTab("ESP")
+local espEnabled = false
 local ESPName = Instance.new("TextButton", ESPTab)
 ESPName.Text = "Toggle Name ESP"
 ESPName.Size = UDim2.new(0, 200, 0, 40)
@@ -108,7 +107,107 @@ ESPName.Position = UDim2.new(0, 20, 0, 20)
 ESPName.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 ESPName.TextColor3 = Color3.new(1, 1, 1)
 
--- Other features (Boxes, Tracers, Infinite Jump, Teleport, etc.) go here...
+local espFolder = Instance.new("Folder")
+espFolder.Name = "ESPFolder"
+espFolder.Parent = CoreGui
+
+ESPName.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    espFolder:ClearAllChildren()
+    if espEnabled then
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+                local billboard = Instance.new("BillboardGui")
+                billboard.Adornee = player.Character.Head
+                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.StudsOffset = Vector3.new(0, 2, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Name = player.Name .. "_ESP"
+
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1, 0, 1, 0)
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.Text = player.Name
+                nameLabel.TextColor3 = Color3.new(1, 1, 1)
+                nameLabel.TextStrokeTransparency = 0
+                nameLabel.TextScaled = true
+                nameLabel.Parent = billboard
+
+                billboard.Parent = espFolder
+            end
+        end
+    end
+end)
+
+-- Movement Tab
+local MovementTab = createTab("Movement")
+
+-- WalkSpeed
+local WalkLabel = Instance.new("TextLabel", MovementTab)
+WalkLabel.Text = "WalkSpeed"
+WalkLabel.Position = UDim2.new(0, 20, 0, 20)
+WalkLabel.Size = UDim2.new(0, 100, 0, 20)
+WalkLabel.BackgroundTransparency = 1
+WalkLabel.TextColor3 = Color3.new(1, 1, 1)
+WalkLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local WalkBox = Instance.new("TextBox", MovementTab)
+WalkBox.Text = "16"
+WalkBox.Position = UDim2.new(0, 130, 0, 20)
+WalkBox.Size = UDim2.new(0, 60, 0, 20)
+WalkBox.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+WalkBox.TextColor3 = Color3.new(1, 1, 1)
+
+WalkBox.FocusLost:Connect(function()
+    local val = tonumber(WalkBox.Text)
+    if val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = val
+    end
+end)
+
+-- JumpPower
+local JumpLabel = Instance.new("TextLabel", MovementTab)
+JumpLabel.Text = "JumpPower"
+JumpLabel.Position = UDim2.new(0, 20, 0, 50)
+JumpLabel.Size = UDim2.new(0, 100, 0, 20)
+JumpLabel.BackgroundTransparency = 1
+JumpLabel.TextColor3 = Color3.new(1, 1, 1)
+JumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local JumpBox = Instance.new("TextBox", MovementTab)
+JumpBox.Text = "50"
+JumpBox.Position = UDim2.new(0, 130, 0, 50)
+JumpBox.Size = UDim2.new(0, 60, 0, 20)
+JumpBox.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+JumpBox.TextColor3 = Color3.new(1, 1, 1)
+
+JumpBox.FocusLost:Connect(function()
+    local val = tonumber(JumpBox.Text)
+    if val and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.JumpPower = val
+    end
+end)
+
+-- Settings Tab (Infinite Jump)
+local SettingsTab = createTab("Settings")
+
+local IJToggle = Instance.new("TextButton", SettingsTab)
+IJToggle.Text = "Toggle Infinite Jump"
+IJToggle.Size = UDim2.new(0, 200, 0, 40)
+IJToggle.Position = UDim2.new(0, 20, 0, 20)
+IJToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+IJToggle.TextColor3 = Color3.new(1, 1, 1)
+
+local infiniteJumpEnabled = false
+IJToggle.MouseButton1Click:Connect(function()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if infiniteJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
 
 -- GUI Toggle Key (RightShift)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -117,17 +216,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         ScreenGui.Enabled = not ScreenGui.Enabled
     end
 end)
-
--- Infinite Jump Toggle (Example)
-local infiniteJumpEnabled = false
-local function onJumpRequest()
-    if infiniteJumpEnabled then
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end
-UserInputService.JumpRequest:Connect(onJumpRequest)
 
 -- Anti-AFK
 LocalPlayer.Idled:Connect(function()
@@ -141,9 +229,9 @@ for _, tool in ipairs(workspace:GetDescendants()) do
     if tool:IsA("Tool") then
         tool.Parent = LocalPlayer.Backpack
     end
-end
+end)
 
--- TELEPORT TO PLAYER (Example)
+-- TELEPORT TO PLAYER (Manual Function)
 local function teleportToPlayer(targetName)
     for _, player in ipairs(Players:GetPlayers()) do
         if player.Name:lower() == targetName:lower() and player.Character then
@@ -151,5 +239,3 @@ local function teleportToPlayer(targetName)
         end
     end
 end
-
--- You can expand this UI with dropdowns for players, toggles, theme changes, and save/load configs easily.
