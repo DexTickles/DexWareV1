@@ -11,7 +11,7 @@ local Mouse = LocalPlayer:GetMouse()
 -- Create ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DexTicklesGUI"
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") -- FIXED FOR SOLARA
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Enabled = true
 
@@ -31,12 +31,16 @@ task.delay(3, function()
     debugLabel:Destroy()
 end)
 
--- Hide/Show Keybind (RightShift)
+-- GUI toggle keybind (RightShift)
 local guiVisible = true
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
         guiVisible = not guiVisible
-        ScreenGui.Enabled = guiVisible
+        for _, child in ipairs(ScreenGui:GetChildren()) do
+            if child ~= debugLabel then
+                child.Visible = guiVisible
+            end
+        end
     end
 end)
 
@@ -133,7 +137,7 @@ ESPName.TextColor3 = Color3.new(1, 1, 1)
 
 local espFolder = Instance.new("Folder")
 espFolder.Name = "ESPFolder"
-espFolder.Parent = ScreenGui -- changed from CoreGui for Solara safety
+espFolder.Parent = ScreenGui
 
 ESPName.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
