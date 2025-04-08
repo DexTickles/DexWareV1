@@ -1,0 +1,155 @@
+-- DexTickles Ultimate GUI v1.0
+-- Stream-proof, modular, sleek dark-themed GUI with advanced tools
+
+-- Services
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+
+-- Create ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DexTicklesGUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Enabled = true
+
+-- Draggable Function
+local function makeDraggable(gui)
+    local dragging, dragInput, dragStart, startPos
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+    RunService.RenderStepped:Connect(function()
+        if dragging and dragInput then
+            local delta = UserInputService:GetMouseLocation() - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 550, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = false
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.Parent = ScreenGui
+makeDraggable(MainFrame)
+
+local UICorner = Instance.new("UICorner", MainFrame)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- Tabs Frame
+local TabsFrame = Instance.new("Frame")
+TabsFrame.Size = UDim2.new(1, 0, 0, 40)
+TabsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TabsFrame.Parent = MainFrame
+
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ContentFrame.Parent = MainFrame
+
+local Tabs = {}
+local CurrentTab = nil
+
+-- Tab Button Function
+local function createTab(name)
+    local button = Instance.new("TextButton")
+    button.Text = name
+    button.Size = UDim2.new(0, 100, 1, 0)
+    button.Position = UDim2.new(0, #Tabs * 100, 0, 0)
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BorderSizePixel = 0
+    button.Parent = TabsFrame
+
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, 0, 1, 0)
+    content.Visible = false
+    content.BackgroundTransparency = 1
+    content.Parent = ContentFrame
+
+    button.MouseButton1Click:Connect(function()
+        if CurrentTab then CurrentTab.Visible = false end
+        CurrentTab = content
+        content.Visible = true
+    end)
+
+    table.insert(Tabs, button)
+    return content
+end
+
+-- ESP Tab
+local ESPTab = createTab("ESP")
+local ESPName = Instance.new("TextButton", ESPTab)
+ESPName.Text = "Toggle Name ESP"
+ESPName.Size = UDim2.new(0, 200, 0, 40)
+ESPName.Position = UDim2.new(0, 20, 0, 20)
+ESPName.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+ESPName.TextColor3 = Color3.new(1, 1, 1)
+
+-- Other features (Boxes, Tracers, Infinite Jump, Teleport, etc.) go here...
+
+-- GUI Toggle Key (RightShift)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        ScreenGui.Enabled = not ScreenGui.Enabled
+    end
+end)
+
+-- Infinite Jump Toggle (Example)
+local infiniteJumpEnabled = false
+local function onJumpRequest()
+    if infiniteJumpEnabled then
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+UserInputService.JumpRequest:Connect(onJumpRequest)
+
+-- Anti-AFK
+LocalPlayer.Idled:Connect(function()
+    game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+    wait(1)
+    game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+end)
+
+-- TOOL GRABBER
+for _, tool in ipairs(workspace:GetDescendants()) do
+    if tool:IsA("Tool") then
+        tool.Parent = LocalPlayer.Backpack
+    end
+end
+
+-- TELEPORT TO PLAYER (Example)
+local function teleportToPlayer(targetName)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name:lower() == targetName:lower() and player.Character then
+            LocalPlayer.Character:MoveTo(player.Character.HumanoidRootPart.Position + Vector3.new(0, 3, 0))
+        end
+    end
+end
+
+-- You can expand this UI with dropdowns for players, toggles, theme changes, and save/load configs easily.
